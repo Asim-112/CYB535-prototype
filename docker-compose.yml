@@ -1,0 +1,57 @@
+version: '3.8'
+
+# Unified infrastructure setup for the CI/CD pipeline.
+# Run: docker-compose up -d
+# This replaces scripts 01 through 04.
+
+networks:
+  cicd-network:
+    driver: bridge
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    networks:
+      - cicd-network
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  sonarqube:
+    image: sonarqube
+    container_name: sonarqube
+    networks:
+      - cicd-network
+    ports:
+      - "9000:9000"
+
+  java17-builder:
+    image: openjdk:17
+    container_name: java17-builder
+    networks:
+      - cicd-network
+    stdin_open: true
+    tty: true
+
+  java11-tester:
+    image: openjdk:11
+    container_name: java11-tester
+    networks:
+      - cicd-network
+    stdin_open: true
+    tty: true
+
+  java8-analyzer:
+    image: openjdk:8
+    container_name: java8-analyzer
+    networks:
+      - cicd-network
+    stdin_open: true
+    tty: true
+
+volumes:
+  jenkins_home:

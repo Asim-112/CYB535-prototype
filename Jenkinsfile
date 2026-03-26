@@ -1,0 +1,96 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'your-dockerhub-username/java-cicd-app'
+        SONARQUBE_URL = 'http://sonarqube:9000'
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Asim-112/CYB535-prototype.git'
+            }
+        }
+
+        stage('Build with Java 17') {
+            steps {
+                sh '''
+                    docker exec java17-builder bash -c "
+                        cd /app &&
+                        javac -version &&
+                        mvn clean compile
+                    "
+                '''
+            }
+        }
+
+        stage('Test with Java 11') {
+            steps {
+                sh '''
+                    docker exec java11-tester bash -c "
+                        cd /app &&
+                        java -version &&
+                        mvn test
+                    "
+                '''
+            }
+        }
+
+        stage('SonarQube Analysis with Java 8') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        docker exec java8-analyzer bash -c "
+                            cd /app &&
+                            mvn sonar:sonar \
+                                -Dsonar.host.url=${SONARQUBE_URL} \
+                                -Dsonar.login=${SONAR_AUTH_TOKEN}
+                        "
+                    '''
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
+                sh "docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest"
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    sh "docker push ${DOCKER_IMAGE}:latest"
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f deployment.yaml'
+                sh 'kubectl rollout status deployment/java-app'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check the logs above for details.'
+        }
+        always {
+            sh 'docker logout || true'
+        }
+    }
+}
