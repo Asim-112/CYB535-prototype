@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: java-app
-          image: your-dockerhub-username/java-cicd-app:latest
+          image: asim112/java-cicd-app:latest
           ports:
             - containerPort: 8080
 ---

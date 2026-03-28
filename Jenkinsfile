@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'your-dockerhub-username/java-cicd-app'
+        DOCKER_IMAGE = 'asim112/java-cicd-app'
         SONARQUBE_URL = 'http://sonarqube:9000'
     }
 
