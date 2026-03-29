@@ -46,16 +46,16 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis with Java 8') {
+        stage('SonarQube Analysis') {
             steps {
                 sh '''
-                    docker exec java8-analyzer bash -c "
+                    docker exec java11-tester bash -c "
                         cd /app &&
                         mvn sonar:sonar \
-                            -Dmaven.compiler.source=8 -Dmaven.compiler.target=8 \
                             -Dsonar.host.url=http://sonarqube:9000 \
                             -Dsonar.login=admin \
-                            -Dsonar.password=admin
+                            -Dsonar.password=admin \
+                            -Dsonar.java.source=8
                     "
                 '''
             }
