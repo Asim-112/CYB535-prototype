@@ -53,8 +53,7 @@ pipeline {
                         cd /app &&
                         mvn sonar:sonar \
                             -Dsonar.host.url=http://sonarqube:9000 \
-                            -Dsonar.login=admin \
-                            -Dsonar.password=admin \
+                            -Dsonar.token=sqa_f869688b73518a27cd7e059bc26bb4a26d45a48d \
                             -Dsonar.java.source=17
                     "
                 '''
