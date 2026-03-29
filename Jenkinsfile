@@ -40,7 +40,7 @@ pipeline {
                     docker exec java11-tester bash -c "
                         cd /app &&
                         java -version &&
-                        mvn test
+                        mvn test -Dmaven.compiler.source=11 -Dmaven.compiler.target=11
                     "
                 '''
             }
@@ -52,6 +52,7 @@ pipeline {
                     docker exec java8-analyzer bash -c "
                         cd /app &&
                         mvn sonar:sonar \
+                            -Dmaven.compiler.source=8 -Dmaven.compiler.target=8 \
                             -Dsonar.host.url=http://sonarqube:9000 \
                             -Dsonar.login=admin \
                             -Dsonar.password=admin
