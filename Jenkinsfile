@@ -14,6 +14,14 @@ pipeline {
             }
         }
 
+        stage('Copy Code to Containers') {
+            steps {
+                sh 'docker cp . java17-builder:/app'
+                sh 'docker cp . java11-tester:/app'
+                sh 'docker cp . java8-analyzer:/app'
+            }
+        }
+
         stage('Build with Java 17') {
             steps {
                 sh '''
@@ -40,16 +48,15 @@ pipeline {
 
         stage('SonarQube Analysis with Java 8') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh '''
-                        docker exec java8-analyzer bash -c "
-                            cd /app &&
-                            mvn sonar:sonar \
-                                -Dsonar.host.url=${SONARQUBE_URL} \
-                                -Dsonar.login=${SONAR_AUTH_TOKEN}
-                        "
-                    '''
-                }
+                sh '''
+                    docker exec java8-analyzer bash -c "
+                        cd /app &&
+                        mvn sonar:sonar \
+                            -Dsonar.host.url=http://sonarqube:9000 \
+                            -Dsonar.login=admin \
+                            -Dsonar.password=admin
+                    "
+                '''
             }
         }
 
