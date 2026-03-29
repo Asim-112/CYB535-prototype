@@ -20,7 +20,7 @@ public class App {
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
         server.createContext("/", exchange -> {
-            String response = greet("CI/CD Pipeline");
+            String response = greet("CI/CD Pipeline v2");
             sendResponse(exchange, 200, response);
         });
 
