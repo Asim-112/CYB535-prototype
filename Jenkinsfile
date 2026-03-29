@@ -49,13 +49,13 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 sh '''
-                    docker exec java11-tester bash -c "
+                    docker exec java17-builder bash -c "
                         cd /app &&
                         mvn sonar:sonar \
                             -Dsonar.host.url=http://sonarqube:9000 \
                             -Dsonar.login=admin \
                             -Dsonar.password=admin \
-                            -Dsonar.java.source=8
+                            -Dsonar.java.source=17
                     "
                 '''
             }
